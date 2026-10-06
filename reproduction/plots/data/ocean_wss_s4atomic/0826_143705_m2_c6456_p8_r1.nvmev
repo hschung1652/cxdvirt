@@ -1,0 +1,76 @@
+=== CXL DRAM Cache ===
+page_granularity: 4k
+cache_policy:    clock
+cache_hits:     0
+cache_misses:   25056791
+hit_rate:       0%
+huge_faults:    0
+dram_occupancy: 1629923/1652736 (4 KiB pages, wm: 1404825/1570099)
+nand_write_lat_applied: 20532247 (avg 241268 ns)
+sync_wb_applied:      1865149 (449435 ms stalled)
+sync_wb_applied_ns:   449435822697
+sync_evicts_4k:       3371791
+wr_alloc_policy:      2 (0=none 1=defer 2=read)
+rmw_reads:            0 (0 ms)
+write_protect_faults: 21768366
+victim_probes_4k:     51071225 (2/miss)
+clock_hw_young:  0
+vskip_second_chance_4k: 26294931
+vforced_4k:           1
+clock_victims_4k:     23427144
+fifo_victims_4k:      0
+lifo_victims_4k:      0
+zap_failures_4k:       60
+evict_sync_fallback_4k: 0
+pf4k_pushed:          0
+pf4k_dropped_full:    0
+pf4k_paired_evicts:   0
+pf4k_no_victim:       0
+pf4k_admit_fail:      0
+pf4k_useful:          0
+pf4k_wasted:          0
+pf4k_late:            0
+pf4k_accuracy_pct:    0
+pf4k_random_arm:      0
+
+=== Async I/O ===
+async_loads:      0
+async_evictions:  20055083
+async_prefetches: 0
+
+=== PMD Zap Effectiveness ===
+latency_enabled:     true
+nr_mmap_entries:     0
+zap_no_mmap_entries: 0
+zap_effective:       0
+zap_ineffective:     0  
+zap_already_clear:   0
+
+=== NAND Latency (retrieve path) ===
+nand_lat_applied:        21430142 (avg 12 us)
+nand_lat_total_ns:       261140769449
+nand_lat_skip_disabled:  0
+nand_lat_skip_noftl:     0
+nand_lat_skip_invalid:   3626649
+
+=== Fault Handler Split (data region) ===
+fault_read_enter:      9610531
+  of which CACHED:     0 (fast-path, no NAND)
+  of which MISS:       9610531 (→ cxl_load_hpage_from_nand)
+fault_write_enter:     15511397
+  of which CACHED:     0 (no dirty-flag update only)
+  of which MISS:       15511397 (→ cxl_allocate_hpage)
+Reads-miss vs nand_lat_applied: 9610531 vs 21430142   (should match sum of applied+skip_*)
+
+=== I/O Workers ===
+worker[0] inflight: 446
+worker[1] inflight: 447
+worker[2] inflight: 447
+total_inflight: 1340 / 147456
+
+=== NAND FTL ===
+nand_reads:          21430142
+nand_writes:         20532255
+nand_erases:         0
+channel_conflicts:   0
+die_conflicts:       0

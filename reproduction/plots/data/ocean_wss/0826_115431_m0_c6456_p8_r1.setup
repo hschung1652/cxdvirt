@@ -1,0 +1,34 @@
+module cxl_core +p
+module cxl_port +p
+module cxl_mem +p
+module cxl_pci +p
+module cxl_acpi +p
+cxl region: cmd_create_region: created 1 region
+{
+  "region":"region0",
+  "resource":300916146176,
+  "size":102810779648,
+  "type":"ram",
+  "interleave_ways":1,
+  "interleave_granularity":256,
+  "decode_state":"commit",
+  "mappings":[
+    {
+      "position":0,
+      "memdev":"mem0",
+      "decoder":"decoder2.0"
+    }
+  ]
+}
+reconfigured 1 device
+[
+  {
+    "chardev":"dax0.0",
+    "size":102810779648,
+    "target_node":1,
+    "align":2097152,
+    "mode":"devdax"
+  }
+]
+crw------- 1 root root 249, 0 Aug 26 11:54 /dev/dax0.0
+Device ready for testing

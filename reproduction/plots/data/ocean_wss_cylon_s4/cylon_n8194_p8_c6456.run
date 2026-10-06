@@ -1,0 +1,38 @@
+daxmalloc: mapped /dev/dax0.0 size=103079215104 base=0x00007fdb88400000
+daxmalloc: mapped /dev/dax0.0 size=103079215104 base=0x00007f5151200000
+daxmalloc: device peak_live=14880176288 B (14190 MiB)  still_live=14880175400 B  capacity=98304 MiB
+
+Ocean simulation with W-cycle multigrid solver
+    Processors                         : 8
+    Grid size                          : 8194 x 8194
+    Grid resolution (meters)           : 20000.00
+    Time between relaxations (seconds) : 28800
+    Error tolerance                    : 1e-07
+
+
+                       PROCESS STATISTICS
+                  Total          Multigrid         Multigrid
+ Proc             Time             Time            Fraction
+    0        332.506865          20.884689             0.063
+    1        330.922543          23.627004             0.071
+    2        333.984776          23.356971             0.070
+    3        328.839062          21.994298             0.067
+    4        334.727304          26.998230             0.081
+    5        334.273024          26.496773             0.079
+    6        334.621100          15.958096             0.048
+    7        330.047086          11.183192             0.034
+  Avg        332.490220          21.312407             0.064
+  Min        328.839062          11.183192             0.034
+  Max        334.727304          26.998230             0.081
+
+                       TIMING INFORMATION
+Start time                    (ns) :     124901900009
+Initialization finish time    (ns) :     222900563944
+Overall finish time           (ns) :     557628083114
+Total time with initialization     :       432.726183
+Total time without initialization  :       334.727519
+    (excludes first timestep)
+Initialization time                :        97.998664
+    (includes the first timestep)
+Timed timesteps                    :                5
+

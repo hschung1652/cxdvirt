@@ -1,0 +1,12 @@
+CXDVirt is a derivative work of NVMeVirt (https://github.com/snu-csl/nvmevirt)
+and is distributed under the GNU General Public License, version 2, the licence
+NVMeVirt carries.  The full text is in the module tree that
+bin/get_nvmevirt.sh produces, at nvmevirt/LICENSE, and at
+https://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
+
+Components under other terms:
+
+  tools/daxmalloc/malloc.c   Doug Lea's dlmalloc.  Released by its author into
+                             the public domain, as stated in its header.
+  tools/daxmalloc/*          the interposer around it: GPL-2.0, as above.
+  kernel/*.patch             changes to Linux 6.18.5: GPL-2.0, per the kernel.

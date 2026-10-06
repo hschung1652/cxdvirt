@@ -1,0 +1,264 @@
+#!/usr/bin/env bash
+# cxdvirt -- drive the CXDVirt CXL-SSD emulator.
+#
+#   cxdvirt build                     build the module, daxmalloc and the example
+#   cxdvirt up [KEY=VAL ...]          load the module and expose /dev/dax0.0
+#   cxdvirt down                      unwind the device and unload
+#   cxdvirt status                    is it up, and with what parameters
+#   cxdvirt stats                     the device counters
+#   cxdvirt params                    every module parameter, with its meaning
+#   cxdvirt run -- CMD [ARGS...]      run CMD with its heap on the device
+#   cxdvirt selftest                  prove hits are DRAM-speed and misses are not
+#
+# `up` and `down` are thin wrappers over bin/setup.sh and bin/teardown.sh, which
+# are straight-line scripts meant to be read and copied.  The defaults are a
+# 96 GiB device with a 4.8 GiB DRAM cache.
+#
+# `up` takes the same KEY=VAL knobs as the environment, so these are equivalent:
+#
+#   cxdvirt up DRAM_CACHE_MB=4096 CACHE_POLICY=fifo
+#   DRAM_CACHE_MB=4096 CACHE_POLICY=fifo cxdvirt up
+#
+# Most parameters are settable only at load time (see `cxdvirt params`), so
+# changing one means `down` then `up` -- and the device keeps its contents across
+# that, because the backing store is a physical carve-out the module maps rather
+# than memory it allocates.  Use ZERO_ON_INIT=true when a run must not see the
+# previous run's bytes.
+set -u
+
+HERE=$(cd "$(dirname "$0")" && pwd)
+ROOT=${CXDVIRT_ROOT:-$(cd "$HERE/.." && pwd)}
+DEV=${CXDVIRT_DEV:-/dev/dax0.0}
+KO=$ROOT/nvmevirt/nvmev.ko
+PRELOAD=$ROOT/tools/daxmalloc/daxmalloc.so
+EXAMPLE=$ROOT/examples/devdax_latency
+
+CXL=${CXL:-$(command -v cxl || echo /usr/bin/cxl)}
+DAXCTL=${DAXCTL:-$(command -v daxctl || echo /usr/bin/daxctl)}
+
+die() { echo "cxdvirt: $*" >&2; exit 1; }
+as_root() { [ "$(id -u)" -eq 0 ] || die "'$1' needs root"; }
+loaded() { lsmod | grep -q '^nvmev '; }
+
+# ---------------------------------------------------------------------------
+usage() { sed -n '2,/^set -u/p' "$0" | sed 's/^# \{0,1\}//;/^set -u/d'; }
+
+cmd_build() {
+	[ -d "$ROOT/nvmevirt" ] || die "nvmevirt/ missing -- run ./bin/get_nvmevirt.sh first
+  (the module ships as a patch against upstream; see README, \"The module ships as a patch\")"
+	echo "== kernel module"
+	# NVMeVirt's Makefile reads KERNELDIR; KDIR= on its command line is ignored.
+	make -C "$ROOT/nvmevirt" -j"$(nproc)" ${KDIR:+KERNELDIR="$KDIR"} || die "module build failed"
+	echo "== daxmalloc"
+	# Through its Makefile, never by hand: the -fno-builtin-malloc family stops
+	# gcc emitting calls to the symbols the shim defines (which recurses), and
+	# HAVE_MMAP=0 makes arena exhaustion return NULL instead of quietly
+	# allocating host DRAM behind the experiment's back.
+	make -C "$ROOT/tools/daxmalloc" daxmalloc.so || die "daxmalloc build failed"
+	echo "== example"
+	gcc -O2 -Wall -o "$EXAMPLE" "$ROOT/examples/devdax_latency.c" || die "example build failed"
+	echo; echo "built: $KO"; echo "       $PRELOAD"; echo "       $EXAMPLE"
+}
+
+cmd_up() {
+	as_root up
+	loaded && die "already loaded; 'cxdvirt down' first"
+	[ -f "$KO" ] || die "$KO missing -- run 'cxdvirt build'"
+	for kv in "$@"; do case "$kv" in *=*) export "${kv?}" ;; *) die "not KEY=VAL: $kv" ;; esac; done
+	grep -q 'memmap=' /proc/cmdline ||
+		echo "cxdvirt: WARNING no memmap= on the kernel command line; insmod will fail" >&2
+	CXL="$CXL" DAXCTL="$DAXCTL" KO="$KO" CXDVIRT_ROOT="$ROOT" \
+		"$ROOT/bin/setup.sh" || die "bring-up failed"
+}
+
+cmd_down() {
+	as_root down
+	CXL="$CXL" DAXCTL="$DAXCTL" CXDVIRT_ROOT="$ROOT" "$ROOT/bin/teardown.sh"
+}
+
+cmd_status() {
+	if ! loaded; then echo "nvmev: not loaded"; else echo "nvmev: loaded"; fi
+	[ -e "$DEV" ] && echo "device: $DEV  $(stat -c '%A %s bytes' "$DEV")" || echo "device: $DEV absent"
+	[ -d /sys/module/nvmev/parameters ] || return 0
+	echo "parameters:"
+	for p in /sys/module/nvmev/parameters/*; do
+		printf '  %-22s %s\n' "$(basename "$p")" "$(cat "$p" 2>/dev/null)"
+	done
+}
+
+cmd_stats() {
+	[ -r /proc/nvmev/debug ] || die "/proc/nvmev/debug unreadable -- is the module loaded?"
+	cat /proc/nvmev/debug
+}
+
+cmd_params() {
+	[ -f "$KO" ] || die "$KO missing -- run 'cxdvirt build'"
+	modinfo -p "$KO"
+}
+
+# Run an unmodified program with its heap on the device.
+#
+# DAXMALLOC_REQUIRE=1 by default, and that default is the point: without it a
+# typo in the device path yields a perfectly normal DRAM run whose numbers look
+# plausible.  Failing loudly is worth more than surviving.
+cmd_run() {
+	[ "${1:-}" = "--" ] && shift
+	[ $# -gt 0 ] || die "usage: cxdvirt run -- CMD [ARGS...]"
+	[ -f "$PRELOAD" ] || die "$PRELOAD missing -- run 'cxdvirt build'"
+	[ -e "$DEV" ] || die "$DEV absent -- 'cxdvirt up' first"
+	# Scope the preload to the child with `env`; exporting it would push the
+	# shim into every process the shell later spawns, including the ones that
+	# are supposed to stay on host DRAM.
+	exec env LD_PRELOAD="$PRELOAD" \
+		DAXMALLOC_PATH="${DAXMALLOC_PATH:-$DEV}" \
+		DAXMALLOC_REQUIRE="${DAXMALLOC_REQUIRE:-1}" \
+		DAXMALLOC_VERBOSE="${DAXMALLOC_VERBOSE:-1}" \
+		${DAXMALLOC_STATS:+DAXMALLOC_STATS="$DAXMALLOC_STATS"} \
+		${DAXMALLOC_FORK:+DAXMALLOC_FORK="$DAXMALLOC_FORK"} \
+		"$@"
+}
+
+# ---------------------------------------------------------------------------
+# selftest -- the check worth running before trusting any number this device
+# produces.
+#
+# It asserts the property that makes the emulator an emulator: latency is
+# BIMODAL.  A resident walk must come back near host-DRAM speed, because a hit
+# is an ordinary load through a PTE the module installed and no code runs.  A
+# streaming walk past the cache must come back near the compiled tR, because
+# every touch is a fault the module services with a NAND model.
+#
+# IT CHECKS THE COUNTERS, NOT ONLY THE CLOCK.  Timing alone cannot tell a
+# modelled NAND read from a fast fault path, and on a freshly loaded device the
+# difference is exactly what you get: the emulated NAND is empty, a first touch
+# of a never-programmed page has nothing to read, and the module charges no
+# latency and counts `nand_lat_skip_invalid` instead.  A cold sweep then returns
+# ~1.5 us, which is below tR and looks like a working device that is merely
+# fast.  So the region is primed with writes first, and the test requires
+# `nand_lat_applied` to have moved.
+#
+# Both halves can fail silently in normal use, which is why this exists:
+#   - if the resident walk is slow, the mapping is not going through the
+#     module's fault handler at all;
+#   - if the streaming walk is fast, or nand_lat_applied does not move, no NAND
+#     latency is being charged, and every measurement taken on the device is
+#     meaningless rather than noisy.
+_ctr() { sed -n "s/^$1: *\\([0-9]*\\).*/\\1/p" /proc/nvmev/debug 2>/dev/null | head -1; }
+
+cmd_selftest() {
+	[ -e "$DEV" ] || die "$DEV absent -- 'cxdvirt up' first"
+	[ -x "$EXAMPLE" ] || die "$EXAMPLE missing -- run 'cxdvirt build'"
+	[ -r /proc/nvmev/debug ] || die "/proc/nvmev/debug unreadable"
+	local cache tr granularity
+	cache=$(cat /sys/module/nvmev/parameters/dram_cache_mb 2>/dev/null || echo 0)
+	tr=$(cat /sys/module/nvmev/parameters/nand_tr_ns 2>/dev/null || echo 0)
+	granularity=$(cat /sys/module/nvmev/parameters/page_granularity 2>/dev/null || echo '?')
+	[ "$granularity" = "4k" ] ||
+		echo "cxdvirt: NOTE page_granularity=$granularity; this test assumes 4k" >&2
+
+	# Stream well past the cache so the second phase is genuinely cold, and keep
+	# the resident set small enough to be certain it stays resident.
+	#
+	# Both are rounded to even MB.  devdax checks the WHOLE VMA against the
+	# device alignment (2 MiB by default, even though the module tracks 4 KiB
+	# pages), so a total that is an odd number of MiB is refused by mmap with
+	# EINVAL and "unaligned vma" in dmesg.  The default 4914 MB cache would pick
+	# 614 + 7371 = 7985 MiB, which is exactly that case.
+	local res=$(( (cache / 8) & ~1 )); [ "$res" -lt 16 ] && res=16
+
+	# STRIDE AND REGION SIZE ARE COUPLED, and getting that wrong is how this
+	# test passes while measuring nothing.  A stride of N touches only 1/N of
+	# the region, so a "1.5x cache" region walked at stride 8 has an effective
+	# working set of 0.19x -- it fits entirely, every read is a hit, and the
+	# miss phase silently becomes a second hit phase.
+	#
+	# Stride exists only to defeat the next-N prefetcher.  With prefetch off,
+	# which is the default, stride 1 is both correct and cheaper.
+	local pfmode stride
+	pfmode=$(cat /sys/module/nvmev/parameters/prefetch_mode 2>/dev/null || echo 0)
+	if [ "$pfmode" = "0" ]; then stride=1; else stride=8; fi
+	local stream=$(( (cache + cache / 2) * stride )); stream=$(( stream & ~1 ))
+	[ "$stream" -lt 256 ] && stream=256
+
+	echo "== selftest: cache ${cache} MB, compiled tR ${tr} ns, prefetch_mode ${pfmode}"
+	echo "   resident ${res} MB / streaming ${stream} MB at stride ${stride}"
+	echo "   (touches $(( stream / stride )) MB, ${_x:-}$(awk -v a="$stream" -v b="$stride" -v c="$cache" \
+	       'BEGIN{printf "%.2f", a/b/c}')x the cache)"
+
+	local ap0 sk0 nr0 wb0 ap1 sk1 nr1 wb1 out
+	ap0=$(_ctr nand_lat_applied); sk0=$(_ctr nand_lat_skip_invalid)
+	nr0=$(_ctr nand_reads);       wb0=$(_ctr sync_wb_applied)
+	# stride 8 defeats the next-N prefetcher if it is enabled, so the streaming
+	# phase measures a demand miss rather than a prefetch hit.
+	echo "   priming ${stream} MB of NAND first; this takes a minute"
+	out=$("$EXAMPLE" --dev "$DEV" --resident-mb "$res" --stream-mb "$stream" \
+	                 --stride "$stride" --prime) || { echo "$out"; die "example failed"; }
+	ap1=$(_ctr nand_lat_applied); sk1=$(_ctr nand_lat_skip_invalid)
+	nr1=$(_ctr nand_reads);       wb1=$(_ctr sync_wb_applied)
+	echo "$out"
+
+	local hit miss floor applied skipped reads syncwb rc=0
+	hit=$(awk  '/resident \(hit\)/  {for(i=1;i<=NF;i++) if($i=="p50") print $(i+1)}' <<<"$out")
+	miss=$(awk '/streaming/         {for(i=1;i<=NF;i++) if($i=="p50") print $(i+1)}' <<<"$out")
+	applied=$(( ${ap1:-0} - ${ap0:-0} ))
+	skipped=$(( ${sk1:-0} - ${sk0:-0} ))
+	reads=$((   ${nr1:-0} - ${nr0:-0} ))
+	syncwb=$(( ${wb1:-0} - ${wb0:-0} ))
+	# A serial 4 KiB read is tR plus the channel transfer, so the floor is tR
+	# itself -- not half of it.  Anything below tR is not a modelled NAND read.
+	floor=$(awk -v t="$tr" 'BEGIN{printf "%.3f", t/1000}')
+
+	echo
+	printf '  counters: nand_lat_applied +%s   nand_reads +%s   nand_lat_skip_invalid +%s\n' \
+	       "$applied" "$reads" "$skipped"
+	printf '            sync_wb_applied +%s\n' "$syncwb"
+	# A miss far above tR is usually not a slow read: it is a dirty victim being
+	# written back on the fault path, at tPROG rather than tR.  Say so, because
+	# the alternative is a user concluding the read model is wrong.
+	[ "${syncwb:-0}" -gt $(( applied / 2 )) ] && [ "$applied" -gt 0 ] &&
+		echo "            NOTE most misses also paid an inline write-back (tPROG, ~100 us)." &&
+		echo "                 That is what BG_DRAIN_4K=1 moves off the fault path."
+	echo
+
+	if awk -v h="${hit:-99}" 'BEGIN{exit !(h+0 < 0.5)}'; then
+		echo "  PASS  hits are DRAM-speed (${hit} us)"
+	else
+		echo "  FAIL  hits cost ${hit} us -- the fault handler is in the hit path"; rc=1
+	fi
+
+	if [ "$applied" -gt 0 ]; then
+		echo "  PASS  NAND read latency was charged ($applied times)"
+	else
+		echo "  FAIL  nand_lat_applied did not move -- no NAND model is being applied."
+		[ "$skipped" -gt 0 ] &&
+			echo "        nand_lat_skip_invalid rose by $skipped: those pages were never"
+		[ "$skipped" -gt 0 ] &&
+			echo "        programmed, so there was nothing to read.  Priming should have"
+		[ "$skipped" -gt 0 ] &&
+			echo "        fixed that -- check cxl_wr_alloc and that the region exceeds the cache."
+		rc=1
+	fi
+
+	if awk -v m="${miss:-0}" -v f="$floor" 'BEGIN{exit !(m+0 >= f+0)}'; then
+		echo "  PASS  misses cost at least tR (${miss} us >= ${floor} us)"
+	else
+		echo "  FAIL  misses cost ${miss} us, below the compiled tR of ${floor} us"; rc=1
+	fi
+
+	echo
+	if [ "$rc" = 0 ]; then echo "selftest OK"; else echo "selftest FAILED"; fi
+	return "$rc"
+}
+
+case "${1:-help}" in
+	build)    shift; cmd_build "$@" ;;
+	up)       shift; cmd_up "$@" ;;
+	down)     shift; cmd_down "$@" ;;
+	status)   shift; cmd_status "$@" ;;
+	stats)    shift; cmd_stats "$@" ;;
+	params)   shift; cmd_params "$@" ;;
+	run)      shift; cmd_run "$@" ;;
+	selftest) shift; cmd_selftest "$@" ;;
+	help|-h|--help) usage ;;
+	*) echo "cxdvirt: unknown command '${1:-}'" >&2; usage >&2; exit 2 ;;
+esac

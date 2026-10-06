@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Stand-in for `cxl` during CXDVirt MIO cells (see ../run_mio_cxdvirt.sh).
+# MIO's thread 0 calls `cxl read-labels mem0 -s 1` twice before its timed phase
+# and once after.  Calls 1-2 reset the per-miss record buffer; call 3 saves it.
+# Anything else is ignored, which is what the missing real `cxl` did during the
+# published captures.
+[ "$*" = "read-labels mem0 -s 1" ] || exit 0
+[ -n "${LSA_CALLS:-}" ] && [ -n "${OPTB_OUT:-}" ] || exit 0
+n=$(( $(cat "$LSA_CALLS" 2>/dev/null || echo 0) + 1 )); echo $n > "$LSA_CALLS"
+if [ $n -le 2 ]; then
+  echo 1 > /proc/nvmev/optb4k
+else
+  cat /proc/nvmev/optb4k > "$OPTB_OUT"
+fi
+exit 0

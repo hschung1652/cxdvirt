@@ -1,0 +1,5 @@
+# Benchmarks, pinned.  fetch.sh clones these at the recorded commit.
+Splash-4   59949ac095c71b526c2367c95eaa936343ea4cfb https://github.com/OdnetninI/Splash-4
+redis      5279a8d44818a5ca51e9abb91a9b8ce481d3c88b https://github.com/redis/redis.git
+ndctl      a871e6153b11fe63780b37cdcb1eb347b296095c https://github.com/pmem/ndctl.git
+ycsb       (no vcs) 0.17.0 release tarball, workloadc

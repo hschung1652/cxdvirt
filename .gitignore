@@ -1,0 +1,24 @@
+# Downloaded by reproduction/scripts/fetch.sh
+/emulator/nvmevirt/
+/reproduction/cylon-tree/
+/reproduction/ndctl/
+/reproduction/bench/*
+!/reproduction/bench/PINS.txt
+
+# Build output
+/emulator/tools/daxmalloc/daxmalloc.so
+/emulator/tools/daxmalloc/test/conformance
+/emulator/tools/daxmalloc/test/conformance_cpp
+/emulator/tools/daxmalloc/test/exhaust
+/emulator/tools/daxmalloc/test/fork_probe
+/emulator/tools/daxmalloc/test/spill
+/emulator/examples/devdax_latency
+/reproduction/tools/felt/felt_probe
+__pycache__/
+*.pyc
+
+# Plotting environment, experiment output and drawn figures
+/reproduction/plots/.venv/
+/reproduction/results/*
+!/reproduction/results/README.md
+/reproduction/figures/

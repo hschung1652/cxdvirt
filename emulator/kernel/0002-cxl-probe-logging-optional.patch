@@ -1,0 +1,162 @@
+--- a/drivers/cxl/core/pci.c
++++ b/drivers/cxl/core/pci.c
+@@ -54,8 +54,14 @@
+ 	struct pci_dev *pdev;
+ 	int port_num, rc;
+ 
+-	if (!dev_is_pci(dport_dev))
++	if (!dev_is_pci(dport_dev)) {
++		dev_err(&port->dev, "dport %s is not a PCI device\n", dev_name(dport_dev));
++		dev_err(&port->dev, "  bus: %px (%s)\n", dport_dev->bus,
++		        dport_dev->bus ? dport_dev->bus->name : "NULL");
++		dev_err(&port->dev, "  type: %px\n", dport_dev->type);
++		dev_err(&port->dev, "  pci_bus_type: %px\n", &pci_bus_type);
+ 		return ERR_PTR(-EINVAL);
++	}
+ 
+ 	pdev = to_pci_dev(dport_dev);
+ 	port_num = pci_get_port_num(pdev);
+--- a/drivers/cxl/mem.c
++++ b/drivers/cxl/mem.c
+@@ -113,6 +113,12 @@
+ 	struct dentry *dentry;
+ 	int rc;
+ 
++	dev_info(dev, "=== CXL_MEM_PROBE START ===\n");
++	dev_info(dev, "  dev: %s\n", dev_name(dev));
++	dev_info(dev, "  parent: %s\n", dev_name(dev->parent));
++	dev_info(dev, "  grandparent: %s\n",
++	         dev->parent->parent ? dev_name(dev->parent->parent) : "NULL");
++
+ 	if (!cxlds->media_ready)
+ 		return -EBUSY;
+ 
+@@ -141,16 +147,23 @@
+ 	if (rc)
+ 		return rc;
+ 
++	dev_info(dev, "  Step 1: Enumerating ports...\n");
+ 	rc = devm_cxl_enumerate_ports(cxlmd);
+-	if (rc)
++	if (rc) {
++		dev_err(dev, "  ✗ devm_cxl_enumerate_ports() failed: %d\n", rc);
+ 		return rc;
++	}
++	dev_info(dev, "  ✓ Port enumeration succeeded\n");
+ 
++	dev_info(dev, "  Step 2: Finding parent port...\n");
+ 	struct cxl_port *parent_port __free(put_cxl_port) =
+ 		cxl_mem_find_port(cxlmd, &dport);
+ 	if (!parent_port) {
++		dev_err(dev, "  ✗ cxl_mem_find_port() returned NULL\n");
+ 		dev_err(dev, "CXL port topology not found\n");
+ 		return -ENXIO;
+ 	}
++	dev_info(dev, "  ✓ Found parent port: %s\n", dev_name(&parent_port->dev));
+ 
+ 	if (cxl_pmem_size(cxlds) && IS_ENABLED(CONFIG_CXL_PMEM)) {
+ 		rc = devm_cxl_add_nvdimm(parent_port, cxlmd);
+--- a/drivers/cxl/core/port.c
++++ b/drivers/cxl/core/port.c
+@@ -1616,8 +1616,8 @@
+ 		return ERR_PTR(-EBUSY);
+ 	}
+ 
+-	struct cxl_dport *new_dport __free(del_cxl_dport) =
+-		devm_cxl_add_dport_by_dev(port, dport_dev);
++	struct cxl_dport *new_dport __free(del_cxl_dport) = devm_cxl_add_dport_by_dev(port, dport_dev);
++
+ 	if (IS_ERR(new_dport))
+ 		return new_dport;
+ 
+@@ -1770,16 +1770,26 @@
+ 	struct device *iter;
+ 	int rc;
+ 
++	dev_info(dev, "=== devm_cxl_enumerate_ports() CALLED [DEBUG_BUILD_v2] ===\n");
++	dev_info(dev, "  memdev: %s\n", dev_name(dev));
++	dev_info(dev, "  RCD mode: %d\n", cxlmd->cxlds->rcd);
++
+ 	/*
+ 	 * Skip intermediate port enumeration in the RCH case, there
+ 	 * are no ports in between a host bridge and an endpoint.
+ 	 */
+-	if (cxlmd->cxlds->rcd)
++	if (cxlmd->cxlds->rcd) {
++		dev_info(dev, "  Skipping (RCD mode enabled)\n");
+ 		return 0;
++	}
+ 
+ 	rc = devm_add_action_or_reset(&cxlmd->dev, cxl_detach_ep, cxlmd);
+-	if (rc)
++	if (rc) {
++		dev_err(dev, "  devm_add_action_or_reset failed: %d\n", rc);
+ 		return rc;
++	}
++
++	dev_info(dev, "  Starting device tree walk...\n");
+ 
+ 	/*
+ 	 * Scan for and add all cxl_ports in this device's ancestry.
+@@ -1792,8 +1802,14 @@
+ 		struct device *uport_dev;
+ 		struct cxl_dport *dport;
+ 
+-		if (is_cxl_host_bridge(dport_dev))
++		dev_info(dev, "  enumerate walk: iter=%s dport_dev=%s\n",
++		         dev_name(iter), dport_dev ? dev_name(dport_dev) : "NULL");
++
++		if (is_cxl_host_bridge(dport_dev)) {
++			dev_info(dev, "  ✓ Found host bridge at %s, enumeration complete\n",
++			         dport_dev ? dev_name(dport_dev) : "NULL");
+ 			return 0;
++		}
+ 
+ 		uport_dev = dport_dev->parent;
+ 		if (!uport_dev) {
+@@ -1802,12 +1818,12 @@
+ 			return -ENXIO;
+ 		}
+ 
+-		dev_dbg(dev, "scan: iter: %s dport_dev: %s parent: %s\n",
+-			dev_name(iter), dev_name(dport_dev),
+-			dev_name(uport_dev));
++		dev_info(dev, "  Looking for CXL port with uport=%s\n", dev_name(uport_dev));
+ 		struct cxl_port *port __free(put_cxl_port) =
+ 			find_cxl_port_by_uport(uport_dev);
+ 		if (port) {
++			dev_info(dev, "  ✓ Found existing port: %s (uport=%s)\n",
++			         dev_name(&port->dev), dev_name(port->uport_dev));
+ 			dev_dbg(&cxlmd->dev,
+ 				"found already registered port %s:%s\n",
+ 				dev_name(&port->dev),
+@@ -1817,13 +1833,28 @@
+ 			 * RP port enumerated by cxl_acpi without dport will
+ 			 * have the dport added here.
+ 			 */
++			dev_info(dev, "  Adding dport for %s to port %s\n",
++			         dev_name(dport_dev), dev_name(&port->dev));
++			dev_info(dev, "  Port driver: %s\n",
++			         port->dev.driver ? port->dev.driver->name : "NONE");
++			if (!port->dev.driver) {
++				dev_err(dev, "  ✗ Port has no driver! Cannot add dport.\n");
++				dev_err(dev, "  Check: lsmod | grep cxl_port\n");
++				dev_err(dev, "  Check: /sys/bus/cxl/devices/%s/driver\n",
++				        dev_name(&port->dev));
++			}
+ 			scoped_guard(device, &port->dev) {
+ 				dport = find_or_add_dport(port, dport_dev);
+ 				if (IS_ERR(dport)) {
+-					if (PTR_ERR(dport) == -EAGAIN)
++					dev_err(dev, "  ✗ find_or_add_dport() failed: %ld\n",
++					        PTR_ERR(dport));
++					if (PTR_ERR(dport) == -EAGAIN) {
++						dev_info(dev, "  Retrying (got -EAGAIN)\n");
+ 						goto retry;
++					}
+ 					return PTR_ERR(dport);
+ 				}
++				dev_info(dev, "  ✓ dport added/found\n");
+ 			}
+ 
+ 			rc = cxl_add_ep(dport, &cxlmd->dev);

@@ -1,0 +1,58 @@
+java -cp /mnt/nvme/cxdvirt/ycsb/redis-binding/conf:/mnt/nvme/cxdvirt/ycsb/conf:/mnt/nvme/cxdvirt/ycsb/lib/redis-binding-0.17.0.jar:/mnt/nvme/cxdvirt/ycsb/lib/jedis-2.9.0.jar:/mnt/nvme/cxdvirt/ycsb/lib/HdrHistogram-2.1.4.jar:/mnt/nvme/cxdvirt/ycsb/lib/jackson-mapper-asl-1.9.4.jar:/mnt/nvme/cxdvirt/ycsb/lib/jackson-core-asl-1.9.4.jar:/mnt/nvme/cxdvirt/ycsb/lib/commons-pool2-2.4.2.jar:/mnt/nvme/cxdvirt/ycsb/lib/core-0.17.0.jar:/mnt/nvme/cxdvirt/ycsb/lib/htrace-core4-4.1.0-incubating.jar site.ycsb.Client -db site.ycsb.db.RedisClient -s -P /mnt/nvme/cxdvirt/ycsb/workloads/workloadc -P /mnt/nvme/cxdvirt/ycsb/cxdvirt-configs/redis-run-3000000-1t-zipfian.properties -p redis.timeout=1800000000 -p measurementtype=raw -p measurement.raw.output_file=/mnt/nvme/cxdvirt/plots/data/redis/clockswclk_d0_c4914_3000000_1t_0825_173302.raw -t
+Command line: -db site.ycsb.db.RedisClient -s -P /mnt/nvme/cxdvirt/ycsb/workloads/workloadc -P /mnt/nvme/cxdvirt/ycsb/cxdvirt-configs/redis-run-3000000-1t-zipfian.properties -p redis.timeout=1800000000 -p measurementtype=raw -p measurement.raw.output_file=/mnt/nvme/cxdvirt/plots/data/redis/clockswclk_d0_c4914_3000000_1t_0825_173302.raw -t
+YCSB Client 0.17.0
+
+Loading workload...
+Starting test.
+2026-08-25 17:34:36:926 0 sec: 0 operations; est completion in 0 second 
+DBWrapper: report latency for each error is false and specific error codes to track for latency are: []
+Raw data measurement: will output to result file: /mnt/nvme/cxdvirt/plots/data/redis/clockswclk_d0_c4914_3000000_1t_0825_173302.raw
+2026-08-25 17:34:46:896 10 sec: 307921 operations; 30792.1 current ops/sec; est completion in 1 minute READ count: 307974, average latency(us): 31.01 
+2026-08-25 17:34:56:896 20 sec: 651554 operations; 34363.3 current ops/sec; est completion in 1 minute READ count: 343608, average latency(us): 27.73 
+2026-08-25 17:35:06:895 30 sec: 961591 operations; 31003.7 current ops/sec; est completion in 1 minute READ count: 310018, average latency(us): 31.20 
+2026-08-25 17:35:17:265 40 sec: 1275341 operations; 30258.46 current ops/sec; est completion in 55 seconds READ count: 313748, average latency(us): 30.63 
+2026-08-25 17:35:26:895 50 sec: 1581439 operations; 31782.58 current ops/sec; est completion in 45 seconds READ count: 306106, average latency(us): 27.99 
+2026-08-25 17:35:36:895 60 sec: 1879973 operations; 29853.4 current ops/sec; est completion in 36 seconds READ count: 298534, average latency(us): 32.45 
+2026-08-25 17:35:46:895 70 sec: 2148536 operations; 26856.3 current ops/sec; est completion in 28 seconds READ count: 268556, average latency(us): 36.21 
+2026-08-25 17:35:56:895 80 sec: 2449871 operations; 30133.5 current ops/sec; est completion in 18 seconds READ count: 301347, average latency(us): 32.04 
+2026-08-25 17:36:07:922 91 sec: 2741710 operations; 26468.26 current ops/sec; est completion in 9 second READ count: 291825, average latency(us): 31.33 
+Raw data measurement: will output to result file: /mnt/nvme/cxdvirt/plots/data/redis/clockswclk_d0_c4914_3000000_1t_0825_173302.raw
+2026-08-25 17:36:16:718 99 sec: 3000000 operations; 29361.15 current ops/sec; READ count: 258284, average latency(us): 33.01 CLEANUP count: 1, average latency(us): 987.00 
+[OVERALL], RunTime(ms), 99824
+[OVERALL], Throughput(ops/sec), 30052.89309184164
+[TOTAL_GCS_G1_Young_Generation], Count, 25
+[TOTAL_GC_TIME_G1_Young_Generation], Time(ms), 16198
+[TOTAL_GC_TIME_%_G1_Young_Generation], Time(%), 16.226558743388363
+[TOTAL_GCS_G1_Old_Generation], Count, 0
+[TOTAL_GC_TIME_G1_Old_Generation], Time(ms), 0
+[TOTAL_GC_TIME_%_G1_Old_Generation], Time(%), 0.0
+[TOTAL_GCs], Count, 25
+[TOTAL_GC_TIME], Time(ms), 16198
+[TOTAL_GC_TIME_%], Time(%), 16.226558743388363
+[READ], Total Operations, 3000000
+[READ], Below is a summary of latency in microseconds:, -1
+[READ], Average, 31.222193333333333
+[READ], Min, 17
+[READ], Max, 1699528
+[READ], p1, 21
+[READ], p5, 22
+[READ], p50, 25
+[READ], p90, 34
+[READ], p95, 39
+[READ], p99, 50
+[READ], p99.9, 78
+[READ], p99.99, 381
+[READ], Return=OK, 3000000
+[CLEANUP], Total Operations, 1
+[CLEANUP], Below is a summary of latency in microseconds:, -1
+[CLEANUP], Average, 987.0
+[CLEANUP], Min, 987
+[CLEANUP], Max, 987
+[CLEANUP], p1, 987
+[CLEANUP], p5, 987
+[CLEANUP], p50, 987
+[CLEANUP], p90, 987
+[CLEANUP], p95, 987
+[CLEANUP], p99, 987
+[CLEANUP], p99.9, 987
+[CLEANUP], p99.99, 987

@@ -1,0 +1,39 @@
+# numactl --cpunodebind 0 --membind 0 env LD_PRELOAD=/mnt/nvme/cxdvirt/nvmevirt_fullcxl_latest/tools/daxmalloc/daxmalloc.so DAXMALLOC_PATH=/dev/shm/cxdvirt_native_heap /mnt/nvme/cxdvirt/Splash-4/Splash-4/ocean-contiguous_partitions/OCEAN-CONT -n8194 -p8 -s
+# kernel 6.18.5-cxdvirt   2026-09-30T03:13:47+00:00   heap 16 GiB pre-faulted on node 1
+daxmalloc: device peak_live=14880176288 B (14190 MiB)  still_live=14880175400 B  capacity=16384 MiB
+
+Ocean simulation with W-cycle multigrid solver
+    Processors                         : 8
+    Grid size                          : 8194 x 8194
+    Grid resolution (meters)           : 20000.00
+    Time between relaxations (seconds) : 28800
+    Error tolerance                    : 1e-07
+
+
+                       PROCESS STATISTICS
+                  Total          Multigrid         Multigrid
+ Proc             Time             Time            Fraction
+    0         12.425338           5.705076             0.459
+    1         12.425613           5.700278             0.459
+    2         12.424503           5.701215             0.459
+    3         12.424762           5.701940             0.459
+    4         12.424824           5.703720             0.459
+    5         12.424888           5.699406             0.459
+    6         12.424572           5.702742             0.459
+    7         12.424701           5.701081             0.459
+  Avg         12.424900           5.701932             0.459
+  Min         12.424503           5.699406             0.459
+  Max         12.425613           5.705076             0.459
+
+                       TIMING INFORMATION
+Start time                    (ns) :  469322272822373
+Initialization finish time    (ns) :  469329302495208
+Overall finish time           (ns) :  469341728160664
+Total time with initialization     :        19.455338
+Total time without initialization  :        12.425665
+    (excludes first timestep)
+Initialization time                :         7.029673
+    (includes the first timestep)
+Timed timesteps                    :                5
+
+# heap pages: node0 0  node1 4194304

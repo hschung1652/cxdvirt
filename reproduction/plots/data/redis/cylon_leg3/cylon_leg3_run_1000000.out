@@ -1,0 +1,63 @@
+/usr/bin/java  -classpath /root/stage/ycsb/conf:/root/stage/ycsb/lib/HdrHistogram-2.1.4.jar:/root/stage/ycsb/lib/commons-pool2-2.4.2.jar:/root/stage/ycsb/lib/core-0.17.0.jar:/root/stage/ycsb/lib/htrace-core4-4.1.0-incubating.jar:/root/stage/ycsb/lib/jackson-core-asl-1.9.4.jar:/root/stage/ycsb/lib/jackson-mapper-asl-1.9.4.jar:/root/stage/ycsb/lib/jedis-2.9.0.jar:/root/stage/ycsb/lib/redis-binding-0.17.0.jar site.ycsb.Client -t -db site.ycsb.db.RedisClient -s -P /root/stage/ycsb/workloads/workloadc -P /root/stage/ycsb/cxdvirt-configs/redis-run-1000000-1t-zipfian.properties -p measurementtype=raw -p measurement.raw.output_file=/root/results/run_1000000_1t.raw
+Command line: -t -db site.ycsb.db.RedisClient -s -P /root/stage/ycsb/workloads/workloadc -P /root/stage/ycsb/cxdvirt-configs/redis-run-1000000-1t-zipfian.properties -p measurementtype=raw -p measurement.raw.output_file=/root/results/run_1000000_1t.raw
+YCSB Client 0.17.0
+
+Loading workload...
+Starting test.
+DBWrapper: report latency for each error is false and specific error codes to track for latency are: []
+2026-08-24 08:16:36:905 0 sec: 0 operations; est completion in 0 second 
+Raw data measurement: will output to result file: /root/results/run_1000000_1t.raw
+2026-08-24 08:16:46:865 10 sec: 66205 operations; 6619.84 current ops/sec; est completion in 2 minutes READ count: 66216, average latency(us): 138.39 
+2026-08-24 08:16:56:865 20 sec: 132538 operations; 6633.96 current ops/sec; est completion in 2 minutes READ count: 66324, average latency(us): 138.70 
+2026-08-24 08:17:06:865 30 sec: 198894 operations; 6635.6 current ops/sec; est completion in 2 minutes READ count: 66355, average latency(us): 138.87 
+2026-08-24 08:17:16:865 40 sec: 265162 operations; 6626.8 current ops/sec; est completion in 1 minute READ count: 66269, average latency(us): 139.01 
+2026-08-24 08:17:26:865 50 sec: 332185 operations; 6702.3 current ops/sec; est completion in 1 minute READ count: 67022, average latency(us): 138.41 
+2026-08-24 08:17:36:865 60 sec: 400252 operations; 6806.7 current ops/sec; est completion in 1 minute READ count: 68068, average latency(us): 136.33 
+2026-08-24 08:17:46:865 70 sec: 468299 operations; 6804.7 current ops/sec; est completion in 1 minute READ count: 68047, average latency(us): 136.35 
+2026-08-24 08:17:56:864 80 sec: 536236 operations; 6793.7 current ops/sec; est completion in 1 minute READ count: 67937, average latency(us): 136.57 
+2026-08-24 08:18:06:865 90 sec: 603805 operations; 6756.9 current ops/sec; est completion in 1 minute READ count: 67569, average latency(us): 137.31 
+2026-08-24 08:18:16:865 100 sec: 672713 operations; 6890.8 current ops/sec; est completion in 49 seconds READ count: 68907, average latency(us): 134.45 
+2026-08-24 08:18:26:865 110 sec: 735929 operations; 6321.6 current ops/sec; est completion in 40 seconds READ count: 63216, average latency(us): 146.41 
+2026-08-24 08:18:36:865 120 sec: 802540 operations; 6661.1 current ops/sec; est completion in 30 seconds READ count: 66611, average latency(us): 139.17 
+2026-08-24 08:18:46:865 130 sec: 870240 operations; 6770 current ops/sec; est completion in 20 seconds READ count: 67701, average latency(us): 137.06 
+2026-08-24 08:18:56:865 140 sec: 937741 operations; 6750.1 current ops/sec; est completion in 10 seconds READ count: 67500, average latency(us): 137.49 
+Raw data measurement: will output to result file: /root/results/run_1000000_1t.raw
+2026-08-24 08:19:06:089 149 sec: 1000000 operations; 6748.94 current ops/sec; READ count: 62258, average latency(us): 137.47 CLEANUP count: 1, average latency(us): 803.00 
+[OVERALL], RunTime(ms), 149225
+[OVERALL], Throughput(ops/sec), 6701.289998324677
+[TOTAL_GCS_G1_Young_Generation], Count, 12
+[TOTAL_GC_TIME_G1_Young_Generation], Time(ms), 1724
+[TOTAL_GC_TIME_%_G1_Young_Generation], Time(%), 1.1553023957111745
+[TOTAL_GCS_G1_Old_Generation], Count, 0
+[TOTAL_GC_TIME_G1_Old_Generation], Time(ms), 0
+[TOTAL_GC_TIME_%_G1_Old_Generation], Time(%), 0.0
+[TOTAL_GCs], Count, 12
+[TOTAL_GC_TIME], Time(ms), 1724
+[TOTAL_GC_TIME_%], Time(%), 1.1553023957111745
+[READ], Total Operations, 1000000
+[READ], Below is a summary of latency in microseconds:, -1
+[READ], Average, 138.089536
+[READ], Min, 109
+[READ], Max, 207140
+[READ], p1, 129
+[READ], p5, 130
+[READ], p50, 134
+[READ], p90, 144
+[READ], p95, 155
+[READ], p99, 172
+[READ], p99.9, 202
+[READ], p99.99, 273
+[READ], Return=OK, 1000000
+[CLEANUP], Total Operations, 1
+[CLEANUP], Below is a summary of latency in microseconds:, -1
+[CLEANUP], Average, 803.0
+[CLEANUP], Min, 803
+[CLEANUP], Max, 803
+[CLEANUP], p1, 803
+[CLEANUP], p5, 803
+[CLEANUP], p50, 803
+[CLEANUP], p90, 803
+[CLEANUP], p95, 803
+[CLEANUP], p99, 803
+[CLEANUP], p99.9, 803
+[CLEANUP], p99.99, 803

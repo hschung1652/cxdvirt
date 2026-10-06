@@ -1,0 +1,224 @@
+--- a/drivers/pci/quirks.c
++++ b/drivers/pci/quirks.c
+@@ -6341,3 +6341,131 @@
+ DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_GLI, 0x9750, pci_mask_replay_timer_timeout);
+ DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_GLI, 0x9755, pci_mask_replay_timer_timeout);
+ #endif
++
++/*
++ * NVMeVirt CXL Type 3 Device - Fix BAR resources for ECAM emulation
++ *
++ * When using ECAM with reserved memory (memmap=), BAR sizing doesn't work
++ * correctly because RAM doesn't implement the BAR sizing protocol (writing
++ * 0xFFFFFFFF should return a size mask, but RAM just stores the value).
++ *
++ * This quirk fixes the BAR resources after enumeration:
++ *   BAR0: Component registers - 64KB at base + 0x100000
++ *   BAR2: Device registers    - 64KB at base + 0x110000
++ *   BAR4: MSI-X table         - 4KB  at base + 0x120000
++ *
++ * The base address is derived from BAR0's start (which the kernel reads
++ * correctly, only the size is wrong).
++ */
++#define NVMEV_CXL_VENDOR_ID	0x0c51
++#define NVMEV_CXL_DEVICE_ID	0x0110
++/* VH mode: BARs after 2MB ECAM region (buses 16-17) */
++#define NVMEV_BAR0_OFFSET	0x200000ULL
++#define NVMEV_BAR2_OFFSET	0x210000ULL
++#define NVMEV_BAR4_OFFSET	0x220000ULL
++
++static void pci_fixup_nvmev_cxl_bars(struct pci_dev *pdev)
++{
++	struct resource *res;
++	u64 base;
++
++	/*
++	 * Derive memmap base from BAR0 start address.
++	 * BAR0 is at base + 0x100000, so base = BAR0_start - 0x100000
++	 */
++	if (!pci_resource_start(pdev, 0)) {
++		pci_warn(pdev, "NVMeVirt CXL: BAR0 not set, cannot fix resources\n");
++		return;
++	}
++
++	base = pci_resource_start(pdev, 0) - NVMEV_BAR0_OFFSET;
++	pci_info(pdev, "NVMeVirt CXL: Fixing BAR resources (base=0x%llx)\n", base);
++
++	/*
++	 * All BARs marked prefetchable to match the bridge's 64-bit
++	 * prefetchable memory window (non-prefetchable only supports 32-bit).
++	 * The actual CPU memory type is controlled by memremap/ioremap.
++	 */
++
++	/* BAR0: Component registers - 64KB, 64-bit, prefetchable */
++	res = &pdev->resource[0];
++	res->start = base + NVMEV_BAR0_OFFSET;
++	res->end = res->start + SZ_64K - 1;
++	res->flags = IORESOURCE_MEM | IORESOURCE_MEM_64 | IORESOURCE_PREFETCH;
++
++	/* BAR1: Upper 32 bits of BAR0 (part of 64-bit BAR) */
++	memset(&pdev->resource[1], 0, sizeof(struct resource));
++
++	/* BAR2: Device registers - 64KB, 64-bit, prefetchable */
++	res = &pdev->resource[2];
++	res->start = base + NVMEV_BAR2_OFFSET;
++	res->end = res->start + SZ_64K - 1;
++	res->flags = IORESOURCE_MEM | IORESOURCE_MEM_64 | IORESOURCE_PREFETCH;
++
++	/* BAR3: Upper 32 bits of BAR2 (part of 64-bit BAR) */
++	memset(&pdev->resource[3], 0, sizeof(struct resource));
++
++	/* BAR4: MSI-X table - 4KB, 64-bit, prefetchable */
++	res = &pdev->resource[4];
++	res->start = base + NVMEV_BAR4_OFFSET;
++	res->end = res->start + SZ_4K - 1;
++	res->flags = IORESOURCE_MEM | IORESOURCE_MEM_64 | IORESOURCE_PREFETCH;
++
++	/* BAR5: Upper 32 bits of BAR4 (part of 64-bit BAR) */
++	memset(&pdev->resource[5], 0, sizeof(struct resource));
++
++	pci_info(pdev, "NVMeVirt CXL: BAR0=0x%llx-0x%llx (64KB)\n",
++		 (u64)pdev->resource[0].start, (u64)pdev->resource[0].end);
++	pci_info(pdev, "NVMeVirt CXL: BAR2=0x%llx-0x%llx (64KB)\n",
++		 (u64)pdev->resource[2].start, (u64)pdev->resource[2].end);
++	pci_info(pdev, "NVMeVirt CXL: BAR4=0x%llx-0x%llx (4KB)\n",
++		 (u64)pdev->resource[4].start, (u64)pdev->resource[4].end);
++}
++DECLARE_PCI_FIXUP_HEADER(NVMEV_CXL_VENDOR_ID, NVMEV_CXL_DEVICE_ID, pci_fixup_nvmev_cxl_bars);
++
++/*
++ * NVMeVirt CXL Root Port BAR fixup
++ *
++ * The root port (Type 1 bridge) has BAR0 pointing to CXL component registers.
++ * Like the endpoint, ECAM-based config access doesn't implement BAR sizing,
++ * so the kernel detects BAR0 as 4GB instead of 64KB.
++ *
++ * Layout (VH mode):
++ *   memmap_start + 0x300000: Root port component registers (64KB) - BAR0
++ *   (Outside the bridge's prefetchable window at 0x200000-0x2FFFFF)
++ */
++#define NVMEV_CXL_RP_DEVICE_ID	0x0001
++#define NVMEV_RP_COMP_OFFSET	0x300000ULL
++
++static void pci_fixup_nvmev_cxl_rp_bar(struct pci_dev *pdev)
++{
++	struct resource *res;
++	u64 base;
++
++	/*
++	 * The root port BAR0 is at base + 0x300000.
++	 * We need to derive the base from the BAR0 address.
++	 * However, the BAR0 value in config space shows 0x3040300000,
++	 * so base = BAR0_start - 0x300000
++	 */
++	if (!pci_resource_start(pdev, 0)) {
++		pci_warn(pdev, "NVMeVirt CXL RP: BAR0 not set, cannot fix resources\n");
++		return;
++	}
++
++	base = pci_resource_start(pdev, 0) - NVMEV_RP_COMP_OFFSET;
++	pci_info(pdev, "NVMeVirt CXL RP: Fixing BAR0 resource (base=0x%llx)\n", base);
++
++	/* BAR0: Component registers - 64KB, 64-bit, prefetchable */
++	res = &pdev->resource[0];
++	res->start = base + NVMEV_RP_COMP_OFFSET;
++	res->end = res->start + SZ_64K - 1;
++	res->flags = IORESOURCE_MEM | IORESOURCE_MEM_64 | IORESOURCE_PREFETCH;
++
++	/* BAR1: Upper 32 bits of BAR0 (part of 64-bit BAR) */
++	memset(&pdev->resource[1], 0, sizeof(struct resource));
++
++	pci_info(pdev, "NVMeVirt CXL RP: BAR0=0x%llx-0x%llx (64KB)\n",
++		 (u64)pdev->resource[0].start, (u64)pdev->resource[0].end);
++}
++DECLARE_PCI_FIXUP_HEADER(NVMEV_CXL_VENDOR_ID, NVMEV_CXL_RP_DEVICE_ID, pci_fixup_nvmev_cxl_rp_bar);
+--- a/drivers/acpi/pci_root.c
++++ b/drivers/acpi/pci_root.c
+@@ -42,7 +42,8 @@
+ 				| OSC_PCI_MSI_SUPPORT)
+ 
+ static const struct acpi_device_id root_device_ids[] = {
+-	{"PNP0A03", 0},
++	{"PNP0A03", 0},  /* PCI host bridge */
++	{"ACPI0016", 0}, /* CXL host bridge (for CXL 2.0+ support) */
+ 	{"", 0},
+ };
+ 
+--- a/drivers/acpi/acpi_configfs.c
++++ b/drivers/acpi/acpi_configfs.c
+@@ -43,7 +43,8 @@
+ 		return -EINVAL;
+ 	}
+ 
+-	if (memcmp(header->signature, ACPI_SIG_SSDT, 4)) {
++	if (memcmp(header->signature, ACPI_SIG_SSDT, 4) &&
++    	memcmp(header->signature, ACPI_SIG_CEDT, 4)) {
+ 		pr_err("invalid table signature\n");
+ 		return -EINVAL;
+ 	}
+--- a/drivers/acpi/bus.c
++++ b/drivers/acpi/bus.c
+@@ -1123,6 +1123,7 @@
+ 	.remove		= acpi_device_remove,
+ 	.uevent		= acpi_device_uevent,
+ };
++EXPORT_SYMBOL_GPL(acpi_bus_type);
+ 
+ int acpi_bus_for_each_dev(int (*fn)(struct device *, void *), void *data)
+ {
+--- a/drivers/dax/bus.c
++++ b/drivers/dax/bus.c
+@@ -238,7 +238,7 @@
+ 		dax_drv->remove(dev_dax);
+ }
+ 
+-static const struct bus_type dax_bus_type = {
++const struct bus_type dax_bus_type = {
+ 	.name = "dax",
+ 	.uevent = dax_bus_uevent,
+ 	.match = dax_bus_match,
+@@ -246,6 +246,7 @@
+ 	.remove = dax_bus_remove,
+ 	.drv_groups = dax_drv_groups,
+ };
++EXPORT_SYMBOL_GPL(dax_bus_type);
+ 
+ static int dax_bus_match(struct device *dev, const struct device_driver *drv)
+ {
+--- a/drivers/cxl/port.c
++++ b/drivers/cxl/port.c
+@@ -180,3 +180,4 @@
+ MODULE_LICENSE("GPL v2");
+ MODULE_IMPORT_NS("CXL");
+ MODULE_ALIAS_CXL(CXL_DEVICE_PORT);
++MODULE_ALIAS_CXL(CXL_DEVICE_ROOT);
+\ No newline at end of file
+--- a/mm/memory.c
++++ b/mm/memory.c
+@@ -2170,6 +2170,7 @@
+ 	zap_page_range_single_batched(&tlb, vma, address, size, details);
+ 	tlb_finish_mmu(&tlb);
+ }
++EXPORT_SYMBOL_GPL(zap_page_range_single);
+ 
+ /**
+  * zap_vma_ptes - remove ptes mapping the vma
+--- a/drivers/cxl/core/port.c
++++ b/drivers/cxl/core/port.c
+@@ -2222,7 +2222,15 @@
+ 
+ static int cxl_bus_match(struct device *dev, const struct device_driver *drv)
+ {
+-	return cxl_device_id(dev) == to_cxl_drv(drv)->id;
++	int dev_id = cxl_device_id(dev);
++	int drv_id = to_cxl_drv(drv)->id;
++
++	/* Special case: cxl_port driver matches both ROOT and PORT types */
++	if (drv_id == CXL_DEVICE_PORT &&
++	    (dev_id == CXL_DEVICE_PORT || dev_id == CXL_DEVICE_ROOT))
++		return 1;
++
++	return dev_id == drv_id;
+ }
+ 
+ static int cxl_bus_probe(struct device *dev)

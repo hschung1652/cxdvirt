@@ -1,0 +1,4 @@
+# Commandstats
+cmdstat_latency|reset:calls=1,usec=8,usec_per_call=8.00,rejected_calls=0,failed_calls=0
+cmdstat_hgetall:calls=1000000,usec=7758421,usec_per_call=7.76,rejected_calls=0,failed_calls=0
+cmdstat_config|resetstat:calls=1,usec=69,usec_per_call=69.00,rejected_calls=0,failed_calls=0

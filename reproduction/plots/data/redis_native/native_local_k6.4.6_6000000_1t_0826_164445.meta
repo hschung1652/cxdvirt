@@ -1,0 +1,16 @@
+# native Redis baseline, no device, at 2026-08-26T16:44:45+00:00
+kernel 6.4.6
+arm local
+cpunodebind 0
+membind 0
+records 6000000
+threads 1
+daxmalloc no
+nvmev_loaded no
+redis Redis server v=8.10.0 sha=5279a8d4:0 malloc=libc bits=64 build=68ea3ab24aae45bb
+loadavg 4.41 3.29 2.92
+node0_free_mb 149925
+node1_free_mb 84542
+used_memory 10457476336
+vmrss_bytes 11385561088
+numa_maps_n0 48

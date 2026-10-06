@@ -1,0 +1,5 @@
+cylon capture  start 2026-09-23T20:01:57+00:00  buf 4915MB  M1=8390 M8=1534
+qemu 2026-08-25 13:19:14.803854530 +0000
+buffer_way=5 bufsz_mb=4915 ch_xfer_lat=3232 devsz_mb=98304 luns_per_ch=16 nchs=8 pg_rd_lat=3000 pg_wr_lat=100000 replacement=3 
+[WM-PATCH] size=1258240 high_wm=0 (0%) low_wm=0 (85%) batch=16
+uname 6.4.6

@@ -1,0 +1,19 @@
+/* Export exactly the interposed allocator entry points.  Everything else --
+ * notably dlmalloc's mspace_* -- stays local so it can never be preempted by,
+ * or collide with, another preloaded library. */
+{
+	global:
+		malloc;
+		free;
+		calloc;
+		realloc;
+		reallocarray;
+		posix_memalign;
+		aligned_alloc;
+		memalign;
+		valloc;
+		pvalloc;
+		malloc_usable_size;
+	local:
+		*;
+};

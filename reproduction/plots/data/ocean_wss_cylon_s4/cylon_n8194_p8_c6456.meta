@@ -1,0 +1,14 @@
+platform cylon
+placement daxmalloc
+bufsz_mb 6456
+wss 2.198
+ocean_n 8194
+ocean_p 8
+pg_rd_lat 3000
+peak_live 14880176288
+exit 0
+wall_s 432.732974794
+solve_s 334.727519
+init_s 97.998664
+multi_s 20.884689
+timesteps 5

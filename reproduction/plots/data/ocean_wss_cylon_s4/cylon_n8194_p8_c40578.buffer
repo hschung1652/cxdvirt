@@ -1,0 +1,12 @@
+Entry cnt: 3626625/10387968
+Buffer read: 0 hit/ 2149186 miss
+Buffer write: 0 hit/ 1477439 miss
+Dirty evictions (NAND wr charged): 0 of 0
+Watermark drains: 0 (high=9868569 low=8829772 batch=1)
+MODE: evict_sync=3 wm_high=9868569 wm_batch=1 wb_slots(env)=4
+First-touch programs: DEFERRED to eviction (3626625 skipped)
+WB charge: 0 inline / 0 absorbed (0.0% inline)
+WB collisions: 0 of 0 (0.0%), avg 0.0 us
+Writeback: 0 sync / 0 async (0.0% sync)
+Model svc: 0.0 ns/req over 3626625 reqs
+Option-B: wrote 3626625 records to /mnt/nvme/cxdvirt/Cylon/CylonLogs/optb_stages_CLOCK_way32.csv

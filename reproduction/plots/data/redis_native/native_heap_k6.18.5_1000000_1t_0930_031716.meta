@@ -1,0 +1,21 @@
+# native Redis baseline, no device, at 2026-09-30T03:17:16+00:00
+kernel 6.18.5-cxdvirt
+arm heap
+cpunodebind 0
+membind 0
+records 1000000
+threads 1
+daxmalloc yes
+heap_file /dev/shm/cxdvirt_native_heap
+heap_node 1
+heap_gb 4
+nvmev_loaded no
+redis Redis server v=8.10.0 sha=5279a8d4:0 malloc=libc bits=64 build=68ea3ab24aae45bb
+loadavg 4.91 2.65 1.36
+node0_free_mb 109820
+node1_free_mb 82254
+used_memory 1697304616
+vmrss_bytes 1844023296
+numa_maps_n0 55
+heap_pages_n0 0
+heap_pages_n1 448594

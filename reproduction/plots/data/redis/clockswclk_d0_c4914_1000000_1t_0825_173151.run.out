@@ -1,0 +1,51 @@
+java -cp /mnt/nvme/cxdvirt/ycsb/redis-binding/conf:/mnt/nvme/cxdvirt/ycsb/conf:/mnt/nvme/cxdvirt/ycsb/lib/redis-binding-0.17.0.jar:/mnt/nvme/cxdvirt/ycsb/lib/jedis-2.9.0.jar:/mnt/nvme/cxdvirt/ycsb/lib/HdrHistogram-2.1.4.jar:/mnt/nvme/cxdvirt/ycsb/lib/jackson-mapper-asl-1.9.4.jar:/mnt/nvme/cxdvirt/ycsb/lib/jackson-core-asl-1.9.4.jar:/mnt/nvme/cxdvirt/ycsb/lib/commons-pool2-2.4.2.jar:/mnt/nvme/cxdvirt/ycsb/lib/core-0.17.0.jar:/mnt/nvme/cxdvirt/ycsb/lib/htrace-core4-4.1.0-incubating.jar site.ycsb.Client -db site.ycsb.db.RedisClient -s -P /mnt/nvme/cxdvirt/ycsb/workloads/workloadc -P /mnt/nvme/cxdvirt/ycsb/cxdvirt-configs/redis-run-1000000-1t-zipfian.properties -p redis.timeout=1800000000 -p measurementtype=raw -p measurement.raw.output_file=/mnt/nvme/cxdvirt/plots/data/redis/clockswclk_d0_c4914_1000000_1t_0825_173151.raw -t
+Command line: -db site.ycsb.db.RedisClient -s -P /mnt/nvme/cxdvirt/ycsb/workloads/workloadc -P /mnt/nvme/cxdvirt/ycsb/cxdvirt-configs/redis-run-1000000-1t-zipfian.properties -p redis.timeout=1800000000 -p measurementtype=raw -p measurement.raw.output_file=/mnt/nvme/cxdvirt/plots/data/redis/clockswclk_d0_c4914_1000000_1t_0825_173151.raw -t
+YCSB Client 0.17.0
+
+Loading workload...
+Starting test.
+DBWrapper: report latency for each error is false and specific error codes to track for latency are: []
+2026-08-25 17:32:23:990 0 sec: 0 operations; est completion in 0 second 
+Raw data measurement: will output to result file: /mnt/nvme/cxdvirt/plots/data/redis/clockswclk_d0_c4914_1000000_1t_0825_173151.raw
+2026-08-25 17:32:33:958 10 sec: 313061 operations; 31302.97 current ops/sec; est completion in 22 seconds READ count: 313122, average latency(us): 30.42 
+2026-08-25 17:32:43:958 20 sec: 697649 operations; 38462.65 current ops/sec; est completion in 9 second READ count: 384546, average latency(us): 24.95 
+Raw data measurement: will output to result file: /mnt/nvme/cxdvirt/plots/data/redis/clockswclk_d0_c4914_1000000_1t_0825_173151.raw
+2026-08-25 17:32:53:207 29 sec: 1000000 operations; 32690.13 current ops/sec; READ count: 302332, average latency(us): 29.41 CLEANUP count: 1, average latency(us): 1142.00 
+[OVERALL], RunTime(ms), 29249
+[OVERALL], Throughput(ops/sec), 34189.203049676915
+[TOTAL_GCS_G1_Young_Generation], Count, 13
+[TOTAL_GC_TIME_G1_Young_Generation], Time(ms), 2349
+[TOTAL_GC_TIME_%_G1_Young_Generation], Time(%), 8.031043796369106
+[TOTAL_GCS_G1_Old_Generation], Count, 0
+[TOTAL_GC_TIME_G1_Old_Generation], Time(ms), 0
+[TOTAL_GC_TIME_%_G1_Old_Generation], Time(%), 0.0
+[TOTAL_GCs], Count, 13
+[TOTAL_GC_TIME], Time(ms), 2349
+[TOTAL_GC_TIME_%], Time(%), 8.031043796369106
+[READ], Total Operations, 1000000
+[READ], Below is a summary of latency in microseconds:, -1
+[READ], Average, 28.012248
+[READ], Min, 19
+[READ], Max, 352087
+[READ], p1, 21
+[READ], p5, 22
+[READ], p50, 24
+[READ], p90, 32
+[READ], p95, 36
+[READ], p99, 42
+[READ], p99.9, 59
+[READ], p99.99, 99
+[READ], Return=OK, 1000000
+[CLEANUP], Total Operations, 1
+[CLEANUP], Below is a summary of latency in microseconds:, -1
+[CLEANUP], Average, 1142.0
+[CLEANUP], Min, 1142
+[CLEANUP], Max, 1142
+[CLEANUP], p1, 1142
+[CLEANUP], p5, 1142
+[CLEANUP], p50, 1142
+[CLEANUP], p90, 1142
+[CLEANUP], p95, 1142
+[CLEANUP], p99, 1142
+[CLEANUP], p99.9, 1142
+[CLEANUP], p99.99, 1142

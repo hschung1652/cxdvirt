@@ -1,0 +1,110 @@
+java -cp /mnt/nvme/cxdvirt/repro/bench/ycsb/redis-binding/conf:/mnt/nvme/cxdvirt/repro/bench/ycsb/conf:/mnt/nvme/cxdvirt/repro/bench/ycsb/lib/redis-binding-0.17.0.jar:/mnt/nvme/cxdvirt/repro/bench/ycsb/lib/jedis-2.9.0.jar:/mnt/nvme/cxdvirt/repro/bench/ycsb/lib/HdrHistogram-2.1.4.jar:/mnt/nvme/cxdvirt/repro/bench/ycsb/lib/jackson-mapper-asl-1.9.4.jar:/mnt/nvme/cxdvirt/repro/bench/ycsb/lib/jackson-core-asl-1.9.4.jar:/mnt/nvme/cxdvirt/repro/bench/ycsb/lib/commons-pool2-2.4.2.jar:/mnt/nvme/cxdvirt/repro/bench/ycsb/lib/core-0.17.0.jar:/mnt/nvme/cxdvirt/repro/bench/ycsb/lib/htrace-core4-4.1.0-incubating.jar site.ycsb.Client -db site.ycsb.db.RedisClient -s -P /mnt/nvme/cxdvirt/repro/bench/ycsb/workloads/workloadc -P /mnt/nvme/cxdvirt/repro/bench/ycsb/cxdvirt-configs/redis-run-8000000-1t-zipfian.properties -p redis.timeout=1800000000 -p measurementtype=raw -p measurement.raw.output_file=/mnt/nvme/cxdvirt/plots/data/redis/fig8_4914/prefetch/clock_d2_c4914_8000000_1t_0925_181341.raw -t
+Command line: -db site.ycsb.db.RedisClient -s -P /mnt/nvme/cxdvirt/repro/bench/ycsb/workloads/workloadc -P /mnt/nvme/cxdvirt/repro/bench/ycsb/cxdvirt-configs/redis-run-8000000-1t-zipfian.properties -p redis.timeout=1800000000 -p measurementtype=raw -p measurement.raw.output_file=/mnt/nvme/cxdvirt/plots/data/redis/fig8_4914/prefetch/clock_d2_c4914_8000000_1t_0925_181341.raw -t
+YCSB Client 0.17.0
+
+Loading workload...
+Starting test.
+DBWrapper: report latency for each error is false and specific error codes to track for latency are: []
+2026-09-25 18:34:11:823 0 sec: 0 operations; est completion in 0 second 
+Raw data measurement: will output to result file: /mnt/nvme/cxdvirt/plots/data/redis/fig8_4914/prefetch/clock_d2_c4914_8000000_1t_0925_181341.raw
+2026-09-25 18:34:21:796 10 sec: 94708 operations; 9468.91 current ops/sec; est completion in 13 minutes READ count: 94732, average latency(us): 102.87 
+2026-09-25 18:34:31:793 20 sec: 210426 operations; 11574.11 current ops/sec; est completion in 12 minutes READ count: 115698, average latency(us): 84.79 
+2026-09-25 18:34:41:793 30 sec: 332453 operations; 12202.7 current ops/sec; est completion in 11 minutes READ count: 122025, average latency(us): 80.55 
+2026-09-25 18:34:51:794 40 sec: 439078 operations; 10662.5 current ops/sec; est completion in 11 minutes READ count: 106629, average latency(us): 92.24 
+2026-09-25 18:35:01:793 50 sec: 561737 operations; 12265.9 current ops/sec; est completion in 11 minutes READ count: 122663, average latency(us): 77.95 
+2026-09-25 18:35:12:046 60 sec: 688467 operations; 12673 current ops/sec; est completion in 10 minutes READ count: 126729, average latency(us): 79.57 
+2026-09-25 18:35:22:063 70 sec: 818153 operations; 12968.6 current ops/sec; est completion in 10 minutes READ count: 129680, average latency(us): 75.78 
+2026-09-25 18:35:31:793 80 sec: 957027 operations; 13887.4 current ops/sec; est completion in 9 minutes READ count: 138874, average latency(us): 68.64 
+2026-09-25 18:35:41:793 90 sec: 1096891 operations; 13986.4 current ops/sec; est completion in 9 minutes READ count: 139867, average latency(us): 70.04 
+2026-09-25 18:35:51:793 100 sec: 1230295 operations; 13340.4 current ops/sec; est completion in 9 minutes READ count: 133400, average latency(us): 73.59 
+2026-09-25 18:36:01:793 110 sec: 1362910 operations; 13261.5 current ops/sec; est completion in 8 minutes READ count: 132617, average latency(us): 73.75 
+2026-09-25 18:36:11:793 120 sec: 1499996 operations; 13708.6 current ops/sec; est completion in 8 minutes READ count: 137086, average latency(us): 71.52 
+2026-09-25 18:36:21:793 130 sec: 1637751 operations; 13775.5 current ops/sec; est completion in 8 minutes READ count: 137753, average latency(us): 71.16 
+2026-09-25 18:36:31:793 140 sec: 1765328 operations; 12757.7 current ops/sec; est completion in 8 minutes READ count: 127575, average latency(us): 76.55 
+2026-09-25 18:36:41:793 150 sec: 1900479 operations; 13515.1 current ops/sec; est completion in 8 minutes READ count: 135154, average latency(us): 72.46 
+2026-09-25 18:36:51:793 160 sec: 2036257 operations; 13577.8 current ops/sec; est completion in 7 minutes READ count: 135777, average latency(us): 72.20 
+2026-09-25 18:37:01:793 170 sec: 2169388 operations; 13313.1 current ops/sec; est completion in 7 minutes READ count: 133138, average latency(us): 73.66 
+2026-09-25 18:37:11:793 180 sec: 2292949 operations; 12356.1 current ops/sec; est completion in 7 minutes READ count: 123557, average latency(us): 79.12 
+2026-09-25 18:37:21:793 190 sec: 2420303 operations; 12735.4 current ops/sec; est completion in 7 minutes READ count: 127357, average latency(us): 76.78 
+2026-09-25 18:37:32:607 200 sec: 2554031 operations; 12367.34 current ops/sec; est completion in 7 minutes READ count: 133723, average latency(us): 79.30 
+2026-09-25 18:37:41:793 210 sec: 2693231 operations; 15151.84 current ops/sec; est completion in 6 minutes READ count: 139208, average latency(us): 64.60 
+2026-09-25 18:37:51:793 220 sec: 2819379 operations; 12614.8 current ops/sec; est completion in 6 minutes READ count: 126144, average latency(us): 77.72 
+2026-09-25 18:38:01:793 230 sec: 2946990 operations; 12761.1 current ops/sec; est completion in 6 minutes READ count: 127614, average latency(us): 76.74 
+2026-09-25 18:38:12:506 240 sec: 3077491 operations; 12181.56 current ops/sec; est completion in 6 minutes READ count: 130494, average latency(us): 69.58 
+2026-09-25 18:38:21:793 250 sec: 3217611 operations; 15087.76 current ops/sec; est completion in 6 minutes READ count: 140122, average latency(us): 64.84 
+2026-09-25 18:38:31:793 260 sec: 3342624 operations; 12501.3 current ops/sec; est completion in 6 minutes READ count: 125017, average latency(us): 78.47 
+2026-09-25 18:38:41:793 270 sec: 3467129 operations; 12450.5 current ops/sec; est completion in 5 minutes READ count: 124500, average latency(us): 78.77 
+2026-09-25 18:38:51:793 280 sec: 3615979 operations; 14885 current ops/sec; est completion in 5 minutes READ count: 148853, average latency(us): 65.69 
+2026-09-25 18:39:01:793 290 sec: 3737729 operations; 12175 current ops/sec; est completion in 5 minutes READ count: 121754, average latency(us): 67.91 
+2026-09-25 18:39:11:793 300 sec: 3856369 operations; 11864 current ops/sec; est completion in 5 minutes READ count: 118630, average latency(us): 82.45 
+2026-09-25 18:39:21:793 310 sec: 4003417 operations; 14704.8 current ops/sec; est completion in 5 minutes READ count: 147054, average latency(us): 66.42 
+2026-09-25 18:39:31:793 320 sec: 4128838 operations; 12542.1 current ops/sec; est completion in 5 minutes READ count: 125423, average latency(us): 78.17 
+2026-09-25 18:39:41:794 330 sec: 4247683 operations; 11883.31 current ops/sec; est completion in 4 minutes READ count: 118839, average latency(us): 82.46 
+2026-09-25 18:39:51:793 340 sec: 4391189 operations; 14352.04 current ops/sec; est completion in 4 minutes READ count: 143510, average latency(us): 67.94 
+2026-09-25 18:40:01:794 350 sec: 4513952 operations; 12276.3 current ops/sec; est completion in 4 minutes READ count: 122760, average latency(us): 79.78 
+2026-09-25 18:40:11:793 360 sec: 4653320 operations; 13936.8 current ops/sec; est completion in 4 minutes READ count: 139373, average latency(us): 69.82 
+2026-09-25 18:40:21:793 370 sec: 4774912 operations; 12159.2 current ops/sec; est completion in 4 minutes READ count: 121591, average latency(us): 80.70 
+2026-09-25 18:40:31:793 380 sec: 4898772 operations; 12386 current ops/sec; est completion in 4 minutes READ count: 123852, average latency(us): 65.04 
+2026-09-25 18:40:41:793 390 sec: 5047294 operations; 14852.2 current ops/sec; est completion in 3 minutes READ count: 148526, average latency(us): 65.78 
+2026-09-25 18:40:51:793 400 sec: 5173341 operations; 12604.7 current ops/sec; est completion in 3 minutes READ count: 126052, average latency(us): 77.95 
+2026-09-25 18:41:02:251 410 sec: 5297146 operations; 11838.31 current ops/sec; est completion in 3 minutes READ count: 123799, average latency(us): 82.86 
+2026-09-25 18:41:11:793 420 sec: 5431475 operations; 14077.66 current ops/sec; est completion in 3 minutes READ count: 134338, average latency(us): 69.14 
+2026-09-25 18:41:21:793 430 sec: 5552080 operations; 12060.5 current ops/sec; est completion in 3 minutes READ count: 120595, average latency(us): 65.88 
+2026-09-25 18:41:31:793 440 sec: 5696896 operations; 14481.6 current ops/sec; est completion in 2 minutes READ count: 144821, average latency(us): 67.47 
+2026-09-25 18:41:41:793 450 sec: 5814998 operations; 11810.2 current ops/sec; est completion in 2 minutes READ count: 118101, average latency(us): 83.08 
+2026-09-25 18:41:53:458 461 sec: 5958231 operations; 12278.87 current ops/sec; est completion in 2 minutes READ count: 143231, average latency(us): 79.84 
+2026-09-25 18:42:01:793 470 sec: 6081737 operations; 14817.76 current ops/sec; est completion in 2 minutes READ count: 123506, average latency(us): 65.93 
+2026-09-25 18:42:11:793 480 sec: 6199605 operations; 11786.8 current ops/sec; est completion in 2 minutes READ count: 117866, average latency(us): 83.21 
+2026-09-25 18:42:21:793 490 sec: 6337950 operations; 13834.5 current ops/sec; est completion in 2 minutes READ count: 138349, average latency(us): 70.36 
+2026-09-25 18:42:31:793 500 sec: 6459109 operations; 12115.9 current ops/sec; est completion in 2 minutes READ count: 121157, average latency(us): 81.00 
+2026-09-25 18:42:41:793 510 sec: 6606066 operations; 14695.7 current ops/sec; est completion in 1 minute READ count: 146957, average latency(us): 66.47 
+2026-09-25 18:42:51:793 520 sec: 6725975 operations; 11990.9 current ops/sec; est completion in 1 minute READ count: 119910, average latency(us): 81.90 
+2026-09-25 18:43:03:740 531 sec: 6865007 operations; 11637.4 current ops/sec; est completion in 1 minute READ count: 139031, average latency(us): 84.22 
+2026-09-25 18:43:11:793 540 sec: 6982449 operations; 14583.63 current ops/sec; est completion in 1 minute READ count: 117443, average latency(us): 66.91 
+2026-09-25 18:43:21:793 550 sec: 7100722 operations; 11827.3 current ops/sec; est completion in 1 minute READ count: 118271, average latency(us): 82.96 
+2026-09-25 18:43:31:793 560 sec: 7241337 operations; 14061.5 current ops/sec; est completion in 59 seconds READ count: 140615, average latency(us): 69.25 
+2026-09-25 18:43:41:793 570 sec: 7358460 operations; 11712.3 current ops/sec; est completion in 50 seconds READ count: 117127, average latency(us): 83.79 
+2026-09-25 18:43:51:793 580 sec: 7506481 operations; 14802.1 current ops/sec; est completion in 39 seconds READ count: 148023, average latency(us): 66.02 
+2026-09-25 18:44:01:793 590 sec: 7626572 operations; 12009.1 current ops/sec; est completion in 29 seconds READ count: 120087, average latency(us): 81.78 
+2026-09-25 18:44:11:793 600 sec: 7771569 operations; 14499.7 current ops/sec; est completion in 18 seconds READ count: 144997, average latency(us): 67.40 
+2026-09-25 18:44:21:793 610 sec: 7889408 operations; 11783.9 current ops/sec; est completion in 9 second READ count: 117842, average latency(us): 83.29 
+Raw data measurement: will output to result file: /mnt/nvme/cxdvirt/plots/data/redis/fig8_4914/prefetch/clock_d2_c4914_8000000_1t_0925_181341.raw
+2026-09-25 18:44:29:331 617 sec: 8000000 operations; 14671.27 current ops/sec; READ count: 110584, average latency(us): 66.56 CLEANUP count: 1, average latency(us): 1122.00 
+[OVERALL], RunTime(ms), 617538
+[OVERALL], Throughput(ops/sec), 12954.668376682892
+[TOTAL_GCS_G1_Young_Generation], Count, 56
+[TOTAL_GC_TIME_G1_Young_Generation], Time(ms), 59183
+[TOTAL_GC_TIME_%_G1_Young_Generation], Time(%), 9.583701731715296
+[TOTAL_GCS_G1_Old_Generation], Count, 0
+[TOTAL_GC_TIME_G1_Old_Generation], Time(ms), 0
+[TOTAL_GC_TIME_%_G1_Old_Generation], Time(%), 0.0
+[TOTAL_GCs], Count, 56
+[TOTAL_GC_TIME], Time(ms), 59183
+[TOTAL_GC_TIME_%], Time(%), 9.583701731715296
+[READ], Total Operations, 8000000
+[READ], Below is a summary of latency in microseconds:, -1
+[READ], Average, 74.741672375
+[READ], Min, 20
+[READ], Max, 2058792
+[READ], p1, 22
+[READ], p5, 25
+[READ], p50, 36
+[READ], p90, 169
+[READ], p95, 203
+[READ], p99, 337
+[READ], p99.9, 528
+[READ], p99.99, 775
+[READ], Return=OK, 8000000
+[CLEANUP], Total Operations, 1
+[CLEANUP], Below is a summary of latency in microseconds:, -1
+[CLEANUP], Average, 1122.0
+[CLEANUP], Min, 1122
+[CLEANUP], Max, 1122
+[CLEANUP], p1, 1122
+[CLEANUP], p5, 1122
+[CLEANUP], p50, 1122
+[CLEANUP], p90, 1122
+[CLEANUP], p95, 1122
+[CLEANUP], p99, 1122
+[CLEANUP], p99.9, 1122
+[CLEANUP], p99.99, 1122
